@@ -11,6 +11,16 @@ type alias Tema = {
   id : Int
   }
 
+type alias Model = List Tema
+
+modeloInicial : Model
+modeloInicial =
+  [
+    nuevoTema "01. Introduccion" 5 1,
+    nuevoTema "99. Cierre" 4 2,
+    nuevoTema "02. Apertura" 2 3
+  ]
+
 nuevoTema : String -> Int -> Int -> Tema
 nuevoTema titulo duracion id =
   {
@@ -18,6 +28,22 @@ nuevoTema titulo duracion id =
     duracion = duracion,
     id = id
   }
+
+-- UPDATE
+
+type Action = NoOp | SortByTitulo | SortByDuracion
+
+update : Action -> Model -> Model
+update action modelo =
+  case action of
+    NoOp ->
+      modelo
+    SortByTitulo ->
+      List.sortBy .titulo modelo
+    SortByDuracion ->
+      List.sortBy .duracion modelo
+
+
 -- VIEW
 
 pageHeader : Html node
@@ -41,16 +67,26 @@ capitulo cap =
      span [class "duracion"] [text (toString cap.duracion)]
     ]
 
+{- Ya no lo uso
+
 capitulos : Html node
 capitulos =
   ul [] [ capitulo (nuevoTema "Introduccion" 5 1),
           capitulo (nuevoTema "testing model" 2 2)]
+-}
+
 
 --Usamos Model, Update y view
-view : Html node
-view =
-    div [id "container"] [pageHeader, capitulos, pageFooter]
+view : Model -> Html node
+view modelo =
+    div [id "container"] [
+      pageHeader,
+      ul [] (List.map capitulo modelo),
+      pageFooter
+    ]
 
 main : Html node
 main =
-  view
+  modeloInicial
+    |> update SortByTitulo
+    |> view
